@@ -17,20 +17,20 @@ enum PassportFieldKey {
 }
 
 object Day4 {
-  
+
   import aoc2020.day4.PassportFieldKey._
-  
+
   val PassportPattern = "(\\S+):(\\S+)".r
   val ColorPattern = "^#([a-f0-9]{6})$".r
   val PidPattern = "^[0-9]{9}$".r
-  
+
   case class Acc(
       val idx: Int = 0,
       val passports: Map[Int, List[String]] = Map(0 -> List())
   )
 
   case class RawPassportField(val key: String, val value: String)
-  
+
   case class PassportField(val key: PassportFieldKey, val value: String) {
     def isValid = key match {
       case Byr => Try(value.toInt).filter(byr => 1920 <= byr && byr <= 2002).isSuccess
@@ -45,13 +45,13 @@ object Day4 {
       case Hcl => ColorPattern.matches(value)
       case Ecl => value match {
         case "amb" | "blu" | "brn" | "gry" | "grn" | "hzl" | "oth" => true
-        case _ => false  
+        case _ => false
       }
       case Pid => PidPattern.matches(value)
       case Cid => true
     }
   }
-  
+
   object PassportField {
     def fromRaw(raw: RawPassportField): Option[PassportField] = {
       raw match {
@@ -65,18 +65,18 @@ object Day4 {
         case RawPassportField("cid", value) => Some(PassportField(Cid, value))
         case _ => None
       }
-    } 
+    }
   }
-  
+
   case class Passport(val fields: Seq[PassportField]) {
     def isValidPart1 = {
       val diff = (Passport.allFields diff fields.map(_.key).toSet)
       diff.isEmpty || diff == Set(Cid)
     }
-    
-    def isValidPart2 = isValidPart1 && fields.forall(_.isValid) 
+
+    def isValidPart2 = isValidPart1 && fields.forall(_.isValid)
   }
-  
+
   object  Passport {
     val allFields = Set(PassportFieldKey.values: _*)
   }
@@ -86,10 +86,10 @@ object Day4 {
       iter.matchData
         .map(matcher => RawPassportField(matcher.group(1), matcher.group(2)))
         .toList
-        
+
   def parse: Seq[RawPassportField] => Passport = raw =>
       Passport(raw.map(PassportField.fromRaw).flatten)
-  
+
 
   def main(args: Array[String]): Unit = {
     val Acc(_, passportStrings) = readLines("input/day4.txt").foldLeft(Acc()) {
@@ -101,17 +101,17 @@ object Day4 {
             case None        => Some(List(line))
           })
     }
-    
+
     val passports = passportStrings
-      .map { 
-        case (_, l) => l.map(_.trim).mkString(" ") 
+      .map {
+        case (_, l) => l.map(_.trim).mkString(" ")
       }
       .map(PassportPattern.findAllIn)
       .map(parseRaw andThen parse)
 
     val p1 = passports.filter(_.isValidPart1)
     val p2 = passports.filter(_.isValidPart2)
-    
+
     println(s"p1: ${p1.size}")
     println(s"p2: ${p2.size}")
   }
