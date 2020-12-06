@@ -23,12 +23,7 @@ object Day4 {
   val PassportPattern = "(\\S+):(\\S+)".r
   val ColorPattern = "^#([a-f0-9]{6})$".r
   val PidPattern = "^[0-9]{9}$".r
-
-  case class Acc(
-      val idx: Int = 0,
-      val passports: Map[Int, List[String]] = Map(0 -> List())
-  )
-
+  
   case class RawPassportField(val key: String, val value: String)
 
   case class PassportField(val key: PassportFieldKey, val value: String) {
@@ -89,23 +84,14 @@ object Day4 {
 
   def parse: Seq[RawPassportField] => Passport = raw =>
       Passport(raw.map(PassportField.fromRaw).flatten)
-
-
+  
   def main(args: Array[String]): Unit = {
-    val Acc(_, passportStrings) = readLines("input/day4.txt").foldLeft(Acc()) {
-      (acc, line) =>
-        if (line.trim().isEmpty) acc.copy(idx = acc.idx + 1)
-        else
-          acc.copy(passports = acc.passports.updatedWith(acc.idx) {
-            case Some(value) => Some(value :+ line)
-            case None        => Some(List(line))
-          })
-    }
+    val passportStrings: List[List[String]] = 
+      readLines("input/day4.txt")
+        .partitionWhere(_.isEmpty)
 
     val passports = passportStrings
-      .map {
-        case (_, l) => l.map(_.trim).mkString(" ")
-      }
+      .map(_.map(_.trim).mkString(" "))
       .map(PassportPattern.findAllIn)
       .map(parseRaw andThen parse)
 
