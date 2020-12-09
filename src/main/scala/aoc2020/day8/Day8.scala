@@ -60,7 +60,7 @@ object Day8 {
         case _ => ProgramResult.InfiniteLoop()
       } 
     
-    val Some(ProgramState(p2, _)) = allRuns.collectFirst { case ProgramResult.Terminated(state) => state}
+    val Some(ProgramState(p2, _)) = allRuns.collectFirst { case ProgramResult.Terminated(state) => state }
     
     println(p1)
     println(p2)
